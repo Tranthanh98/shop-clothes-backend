@@ -1,0 +1,7 @@
+ShopClothesBackend/Domain/bin/
+ShopClothesBackend/Domain/obj/Domain.csproj.nuget.g.props
+ShopClothesBackend/Domain/obj/
+ShopClothesBackend/ShopClothes.Test/bin/
+ShopClothesBackend/ShopClothes.Test/obj/
+ShopClothesBackend/ShopClothesBackend/bin/
+ShopClothesBackend/ShopClothesBackend/obj/
