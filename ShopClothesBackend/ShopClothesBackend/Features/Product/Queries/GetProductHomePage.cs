@@ -20,12 +20,7 @@ namespace ShopClothesBackend.Features.Product.Queries
             public int Id { get; set; }
            
             public int ImageId { get; set; }
-            public string ImageLink {
-                get
-                {
-                    return "http://localhost:57750/api/file/GetFileByID/" + ImageId;
-                }
-            }
+            public string ImageLink {get;set;}
            
             public string Name { get; set; }
            
@@ -46,7 +41,7 @@ namespace ShopClothesBackend.Features.Product.Queries
         }
         public class Query : IRequest<BaseResponseModel<HomeModel>>
         {
-            
+            public string BaseUrl { get; set; }
         }
         public class Handler : IRequestHandler<Query, BaseResponseModel<HomeModel>>
         {
@@ -70,6 +65,16 @@ namespace ShopClothesBackend.Features.Product.Queries
                 var queryIsNew = await query.Where(i => i.IsNew).ToListAsync();
                 var hotSales = _mapper.Map<List<ProductHomePageModel>>(queryHotSale);
                 var newProducts = _mapper.Map<List<ProductHomePageModel>>(queryIsNew);
+
+                hotSales.ForEach(i =>
+                {
+                    i.ImageLink = "http://" + request.BaseUrl + "/api/file/getfilebyid/" + i.ImageId;
+                });
+
+                newProducts.ForEach(i =>
+                {
+                    i.ImageLink = "http://" + request.BaseUrl + "/api/file/getfilebyid/" + i.ImageId;
+                });
                 ack.IsSuccess = true;
                 ack.Data = new HomeModel()
                 {

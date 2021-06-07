@@ -48,18 +48,22 @@ namespace ShopClothesBackend.Features.Product
         [HttpGet]
         public async Task<BaseResponseModel> GetHomePageProduct()
         {
-            var result = await _mediator.Send(new GetProductHomePage.Query(), default);
+            var baseUrl = Request.Host.Value;
+            var result = await _mediator.Send(new GetProductHomePage.Query() { BaseUrl = baseUrl}, default);
             return result;
         }
         [HttpGet("{id}")]
         public async Task<BaseResponseModel<DetailProduct>> Detail(int id)
         {
-            var result = await _mediator.Send(new Detail.Query() { Id = id }, default);
+            var baseUrl = Request.Host.Value;
+            var result = await _mediator.Send(new Detail.Query() { Id = id, BaseUrl=baseUrl }, default);
             return result;
         }
         [HttpPost]
         public async Task<BaseResponseModel<Pagination<ProductModel>>> Get([FromBody]Get.Query query)
         {
+            var baseUrl = Request.Host.Value;
+            query.BaseUrl = baseUrl;
             var result = await _mediator.Send(query, default);
             return result;
         }

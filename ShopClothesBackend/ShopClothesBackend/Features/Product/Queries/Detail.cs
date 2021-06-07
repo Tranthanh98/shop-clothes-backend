@@ -19,15 +19,14 @@ namespace ShopClothesBackend.Features.Product.Queries
             public List<int> ImageListId { get; set; }
             public List<string> LinkImageList
             {
-                get
-                {
-                    return ImageListId.Select(i => "http://localhost:57750/api/file/GetFileByID/" + i).ToList();
-                }
+                get;
+                set;
             }
         }
         public class Query : IRequest<BaseResponseModel<DetailProduct>>
         {
             public int Id { get; set; }
+            public string BaseUrl { get; set; }
         }
         public class Handler : IRequestHandler<Query, BaseResponseModel<DetailProduct>>
         {
@@ -52,7 +51,14 @@ namespace ShopClothesBackend.Features.Product.Queries
                 {
                     ack.Messages.Add("Sản phẩm không tồn tại");
                 }
-                ack.Data = _mapper.Map<DetailProduct>(product);
+                var proModel = _mapper.Map<DetailProduct>(product);
+                proModel.ImageLink = "http://" + request.BaseUrl + "/api/file/GetFileByID/" + proModel.ImageId;
+                proModel.ImageListId.ForEach(i =>
+                {
+                    var link = "http://" + request.BaseUrl + "/api/file/GetFileByID/" + i;
+                    proModel.LinkImageList.Add(link);
+                });
+                ack.Data = proModel;
                 ack.IsSuccess = true;
                 return ack;
             }

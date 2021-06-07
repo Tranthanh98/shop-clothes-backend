@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Domain.Enum;
 using Domain.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -23,11 +24,13 @@ namespace ShopClothesBackend.Features.Product.Queries
         {
             public string SearchText { get; set; }
             public int OrderBy { get; set; }
+            public EnumType Type { get; set; } = EnumType.Undefined;
         }
         public class Query : IRequest<BaseResponseModel<Pagination<ProductModel>>>
         {
             [FromBody]
             public Request RequestModel { get; set; }
+            public string BaseUrl { get; set; }
         }
         public class Handler : IRequestHandler<Query, BaseResponseModel<Pagination<ProductModel>>>
         {
@@ -48,6 +51,11 @@ namespace ShopClothesBackend.Features.Product.Queries
                 {
                     query = query.Where(i => i.Name.Contains(request.RequestModel.SearchText));
                 }
+                if(request.RequestModel.Type != EnumType.Undefined)
+                {
+                    int typeId = (int)request.RequestModel.Type;
+                    query = query.Where(i => i.TypeId == typeId);
+                }
                 var data = new List<Domain.Domain.Product>();
                 if(request.RequestModel.PageIndex == default || request.RequestModel.PageSize == default)
                 {
@@ -57,13 +65,17 @@ namespace ShopClothesBackend.Features.Product.Queries
                 {
                     data = await query.Skip(request.RequestModel.Skip()).Take(request.RequestModel.PageSize).ToListAsync();
                 }
-
+                var result = _mapper.Map<List<ProductModel>>(data);
+                result.ForEach(i =>
+                {
+                    i.ImageLink = "http://" + request.BaseUrl + "/api/file/GetFileByID/" + i.ImageId;
+                });
                 ack.Data = new Pagination<ProductModel>()
                 {
                     PageIndex = request.RequestModel.PageIndex,
                     PageSize = request.RequestModel.PageSize,
                     TotalItem = query.Count(),
-                    Data = _mapper.Map<List<ProductModel>>(data)
+                    Data = result
                 };
                 ack.IsSuccess = true;
                 return ack;
